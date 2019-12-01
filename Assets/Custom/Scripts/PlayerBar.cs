@@ -17,7 +17,7 @@ public class PlayerBar : MonoBehaviour
 	public Rigidbody body;
 
 	/// <summary>
-	/// Ударная сторона палки
+	/// Ударная сторона палки [не нужна]
 	/// </summary>
 	Collider knockSide;
 	
@@ -37,9 +37,14 @@ public class PlayerBar : MonoBehaviour
 	public BarTrack Track;
 
 	/// <summary>
+	/// Трек по которому двигается палка
+	/// </summary>
+	public BasePlayer Player;
+
+	/// <summary>
 	/// Максимальная скорость
 	/// </summary>
-	float _maxspeed;
+	float _maxspeed=10;
 
 	/// <summary>
 	/// 
@@ -49,33 +54,55 @@ public class PlayerBar : MonoBehaviour
 	/// <summary>
 	/// Скорость разгона палки
 	/// </summary>
-	float acceleration;
+	float acceleration = 2f;
 
 	/// <summary>
 	/// Трение палки
 	/// </summary>
-	float friction;
+	float friction = 0.9f;
 	#endregion
+
+	public void Initialize(BarTrack _track, Vector3 front, float yRotation)
+		{
+		var t = new Quaternion();
+		t.eulerAngles = new Vector3(0, yRotation, 0);
+		transform.rotation = t;
+		Front = front;
+		Track = _track;
+		transform.position = Track.TrackCenter;
+		}
 
 	// Use this for initialization
 	void Start ()
 		{
-
+		body = GetComponent<Rigidbody>();
+		body.drag = friction;
 		}
 
 	// Update is called once per frame
 	void Update ()
 		{
 
+		if ( Speed < 0.5f )
+			body.velocity = Vector3.zero;
+		else
+			{
+			body.AddForce(-body.velocity.normalized*friction, ForceMode.Impulse);
+			}
 		}
 
 	public void MoveLeft()
 		{
-
+		if (Speed<=_maxspeed)
+			{
+			body.AddForce(Track.Left*acceleration, ForceMode.Impulse);
+			}
 		}
 
 	public void MoveRight()
 		{
+		if ( Speed <= _maxspeed )
+			body.AddForce(-Track.Left*acceleration, ForceMode.Impulse);
 
 		}
-	}
+}
